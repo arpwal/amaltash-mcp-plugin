@@ -1,0 +1,14 @@
+{
+  "name": "amaltash",
+  "owner": {
+    "name": "Amaltash",
+    "url": "https://amaltash.com"
+  },
+  "plugins": [
+    {
+      "name": "amaltash",
+      "source": "./amaltash-plugin",
+      "description": "Trade on Amaltash from Claude: authenticate, create/backtest/fine-tune/deploy strategies, provision a $25K paper account, finish KYC, connect banks via Plaid, and manage deposits/withdrawals via the Amaltash MCP server."
+    }
+  ]
+}

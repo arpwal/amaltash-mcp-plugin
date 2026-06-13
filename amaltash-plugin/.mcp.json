@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "amaltash": {
+      "type": "http",
+      "url": "https://mcp.amaltash.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${AMALTASH_AGENT_TOKEN:-}"
+      }
+    }
+  }
+}
