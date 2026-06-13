@@ -78,50 +78,43 @@
   </header>
 
   <div class="note">
-    <span class="lbl">How auth works.</span> The hosted server authenticates each
-    request with your personal <code>amat_…</code> token, sent as an
-    <code>Authorization: Bearer</code> header. You create the token once in your
-    Amaltash dashboard and expose it to Claude as an environment variable. Revoke
-    or rotate it any time from the same screen.
+    <span class="lbl">How auth works.</span> Connecting uses <strong>OAuth</strong> —
+    the same one-click "Sign in with…" flow you know from the web. The bundled
+    <code>.mcp.json</code> carries no credentials, so the first request prompts
+    Claude to sign you in: you approve once in your browser, and Claude stores an
+    encrypted, auto-refreshed token. <strong>No token to copy, nothing in your
+    shell.</strong> Revoke access any time from your dashboard or <code>/mcp</code>.
   </div>
 
   <h2><span class="n">1</span>Prerequisites</h2>
   <div class="panel">
     <ul class="tips" style="margin:0">
       <li><strong>Claude Code</strong> (CLI, desktop, or IDE extension).</li>
-      <li>A signed-in <strong>Amaltash</strong> account (to create a connector token).</li>
+      <li>A signed-in <strong>Amaltash</strong> account.</li>
     </ul>
   </div>
 
-  <h2><span class="n">2</span>Create a connector token</h2>
-  <p>In your Amaltash dashboard, open
-     <strong>Settings → Security → Claude connector</strong> and click
-     <strong>Create token</strong>. Copy it immediately — it is shown
-     <strong>once</strong> and looks like <code>amat_…</code>.</p>
-  <p>Expose it to Claude as an environment variable (add it to your shell profile
-     to persist across restarts):</p>
-  <pre><code><span class="cmt"># macOS / Linux — add to ~/.zshrc or ~/.bashrc to persist</span>
-export AMALTASH_AGENT_TOKEN=<span class="tok">"amat_…"</span></code></pre>
-  <p class="sub">The bundled <code>.mcp.json</code> reads
-     <code>${AMALTASH_AGENT_TOKEN}</code> and sends it as the Bearer header — no
-     other configuration is needed.</p>
-
-  <h2><span class="n">3</span>Add the plugin marketplace &amp; install</h2>
+  <h2><span class="n">2</span>Add the plugin marketplace &amp; install</h2>
   <p>Run these inside Claude Code:</p>
   <pre><code><span class="cmt"># Register the marketplace straight from GitHub</span>
 /plugin marketplace add arpwal/amaltash-mcp-plugin
 
 <span class="cmt"># Install the plugin (plugin@marketplace)</span>
 /plugin install amaltash@amaltash</code></pre>
-  <p>Restart Claude Code, then confirm the server is connected:</p>
+
+  <h2><span class="n">3</span>Connect your account</h2>
+  <p>Open the MCP panel, pick <code>amaltash</code>, and choose
+     <strong>Authenticate</strong>:</p>
   <pre><code>/mcp</code></pre>
-  <p class="sub">You should see <code>amaltash</code> <span class="ok">connected</span> with its tool list,
-     and the <code>amaltash-trading</code> skill available.</p>
-  <div class="note warn">
-    <span class="lbl">Token not set?</span> Claude Code expands
-    <code>${AMALTASH_AGENT_TOKEN}</code> at launch. If it's empty, the server
-    replies with a clear "create a token" message — set the variable (step 2) and
-    restart Claude Code.
+  <p>Your browser opens to Amaltash. Sign in if you aren't already, then click
+     <strong>Approve access</strong>. You'll be returned to Claude, now
+     <span class="ok">connected</span> — with the tool list and the
+     <code>amaltash-trading</code> skill available.</p>
+  <div class="note">
+    <span class="lbl">Stays connected.</span> The sign-in is remembered and
+    refreshed automatically — you won't have to do this again on this machine. To
+    disconnect, use <code>/mcp → amaltash → Clear authentication</code>, or revoke
+    from <strong>Settings → Security → Claude connector</strong> in your dashboard.
   </div>
 
   <h2><span class="n">4</span>Try it</h2>
@@ -163,11 +156,22 @@ export AMALTASH_AGENT_TOKEN=<span class="tok">"amat_…"</span></code></pre>
   <table>
     <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
     <tbody>
-      <tr><td><code>amaltash</code> not in <code>/mcp</code></td><td>Confirm <code>AMALTASH_AGENT_TOKEN</code> is set in the shell that launched Claude Code, then restart it.</td></tr>
-      <tr><td>“Create a token / not authenticated”</td><td>Your token is missing, revoked, or expired. Create a fresh one in <strong>Settings → Security → Claude connector</strong> and update the env var.</td></tr>
-      <tr><td>Want to rotate the token</td><td>Create a new one and revoke the old from the same dashboard screen.</td></tr>
+      <tr><td><code>amaltash</code> not in <code>/mcp</code></td><td>Make sure the install (step 2) finished, then restart Claude Code.</td></tr>
+      <tr><td>Shows <code>! Needs authentication</code></td><td>That's expected before you connect — open <code>/mcp</code>, pick <code>amaltash</code>, choose <strong>Authenticate</strong>, and approve in the browser.</td></tr>
+      <tr><td>Browser didn't open / connect failed</td><td>Re-run <code>/mcp → amaltash → Authenticate</code>. If you're on a remote/headless machine with no browser, use the headless setup below instead.</td></tr>
+      <tr><td>Want to disconnect or reconnect</td><td><code>/mcp → amaltash → Clear authentication</code>, then Authenticate again. You can also revoke from <strong>Settings → Security → Claude connector</strong>.</td></tr>
     </tbody>
   </table>
+
+  <h2><span class="n">7</span>Headless / CI (no browser)</h2>
+  <p>The one-click flow above is best for everyday use. Where no browser is
+     available, connect with a personal token instead. Mint one at
+     <strong>Settings → Security → Claude connector → Create token</strong>
+     (<code>amat_…</code>, shown once), then add the connector with it:</p>
+  <pre><code>claude mcp add --transport http amaltash \
+  https://mcp.amaltash.com/mcp \
+  --header <span class="tok">"Authorization: Bearer amat_…"</span></code></pre>
+  <p class="sub">Revoke or rotate the token any time from the same dashboard screen.</p>
 
   <footer>
     Amaltash · Claude Code plugin · AMA-4294 · connects to <code>https://mcp.amaltash.com</code> (hosted).

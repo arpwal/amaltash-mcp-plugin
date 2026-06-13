@@ -1,7 +1,7 @@
 {
   "name": "amaltash",
-  "version": "0.1.0",
-  "description": "Trade on Amaltash from Claude via the hosted Amaltash MCP server: create/backtest/fine-tune/deploy strategies, provision a $25K paper account, finish KYC, connect banks via Plaid, and manage deposits/withdrawals. Authenticates with a personal token from your Amaltash dashboard.",
+  "version": "0.2.0",
+  "description": "Trade on Amaltash from Claude via the hosted Amaltash MCP server: create/backtest/fine-tune/deploy strategies, provision a $25K paper account, finish KYC, connect banks via Plaid, and manage deposits/withdrawals. Connect in one click with OAuth — no token to copy.",
   "author": {
     "name": "Amaltash",
     "url": "https://amaltash.com"

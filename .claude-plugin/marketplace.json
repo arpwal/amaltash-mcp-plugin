@@ -8,7 +8,7 @@
     {
       "name": "amaltash",
       "source": "./amaltash-plugin",
-      "description": "Trade on Amaltash from Claude: authenticate, create/backtest/fine-tune/deploy strategies, provision a $25K paper account, finish KYC, connect banks via Plaid, and manage deposits/withdrawals via the Amaltash MCP server."
+      "description": "Trade on Amaltash from Claude: connect in one click with OAuth, then create/backtest/fine-tune/deploy strategies, provision a $25K paper account, finish KYC, connect banks via Plaid, and manage deposits/withdrawals via the Amaltash MCP server."
     }
   ]
 }
