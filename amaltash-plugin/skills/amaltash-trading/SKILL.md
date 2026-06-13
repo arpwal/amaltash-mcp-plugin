@@ -54,22 +54,34 @@ instead send a personal `amat_…` token as a Bearer header — see the README.)
 - **No connected account?** `get_account_balance` / `deposit_funds` will say so;
   guide the user to `provision_paper_account` (sandbox) or `connect_links` (live).
 
+## After creating a strategy — let the user choose
+`create_strategy` makes **one** strategy and returns its `strategy_id`. When it
+succeeds, STOP and hand control back to the user. Do **not** automatically
+fine-tune, optimize, or chain into another create — that's the user's call.
+Briefly report what was created and offer the next steps as options, e.g.:
+  1. **Backtest it** — run `backtest_strategy` (suggest a window if they didn't
+     give one).
+  2. **Tune it** — change entry/exit rules, assets, timeframe, or risk limits.
+  3. **Deploy it** — paper first unless they explicitly ask for live.
+Act only on the option the user picks.
+
 ## Fine-tuning & error recovery
 `fine_tune_strategy` revises a strategy's code from a plain-English instruction,
-then drafts → backtests → activates it. Use it two ways:
+then drafts → backtests → activates it. **Never call it on your own initiative**
+— only when the user has explicitly asked to change or fix the strategy.
 
-- **Auto-fix code errors.** If `create_strategy`, `backtest_strategy`, or
-  `deploy_strategy` fails because the **strategy code itself errored** (a
-  compile/runtime/execution bug in the generated code), don't make the user
-  debug it — immediately call `fine_tune_strategy` with the error text as the
-  instruction (e.g. "Fix this execution error: <message>"), then re-backtest.
-  Tell the user what broke and what you changed. Retry at most **twice**; if it
-  still errors, stop and show the error rather than looping.
+- **Code errors → offer to fix, don't auto-fix.** If `create_strategy`,
+  `backtest_strategy`, or `deploy_strategy` fails because the **strategy code
+  itself errored** (a compile/runtime/execution bug in the generated code), tell
+  the user what broke and **offer** to fix it via `fine_tune_strategy` (with the
+  error text as the instruction, e.g. "Fix this execution error: <message>").
+  Run it only once they say yes; if they accept and it still errors after
+  **two** attempts, stop and show the error rather than looping.
   - This applies ONLY to code errors. For **environment** failures — not
-    authenticated, below the capital minimum, KYC/bank not set up — do NOT
+    authenticated, below the capital minimum, KYC/bank not set up — never
     fine-tune; guide the user to fix the account instead.
-- **Offer a next iteration after a clean backtest.** Once a backtest succeeds,
-  proactively offer the user two choices:
+- **After a clean backtest, offer (don't auto-run) a next iteration.** Present
+  the choices and wait for the user to pick:
   1. **Tune it your way** — ask what they want to change (entry/exit rules,
      asset, timeframe, risk limits) and pass that to `fine_tune_strategy`.
   2. **Optimize the returns** — suggest 2–3 concrete improvements (e.g. add a
