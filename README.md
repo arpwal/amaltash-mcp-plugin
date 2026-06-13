@@ -3,33 +3,17 @@
 Run your [Amaltash](https://amaltash.com) investing account straight from a
 conversation with Claude. Describe a strategy in plain English, have Claude
 backtest it, paper-trade it with $25,000 of simulated cash, fund a live account,
-and check balances — all by just asking. **No coding, no setup beyond three
-steps below.**
+and check balances — all by just asking. **No coding, no tokens to copy — just
+install it and approve once in your browser.**
 
 ---
 
-## Get started in 3 steps
+## Get started in 2 steps
 
 You'll need [Claude Code](https://claude.com/claude-code) (the desktop app or
 CLI) and an Amaltash account.
 
-### 1. Create your connector token
-In your Amaltash dashboard, open **Settings → Security → Claude connector** and
-click **Create token**. Copy it right away — it's shown only once and looks like
-`amat_xxxx…`. (Think of it like a password for Claude; you can revoke it any
-time from the same screen.)
-
-### 2. Give the token to Claude
-Paste this into your terminal, replacing `amat_…` with the token you copied:
-
-```bash
-export AMALTASH_AGENT_TOKEN="amat_…"
-```
-
-> 💡 To avoid doing this every time, add that same line to the end of your
-> `~/.zshrc` (Mac) or `~/.bashrc` (Linux) file, then open a new terminal.
-
-### 3. Add the plugin in Claude Code
+### 1. Add the plugin in Claude Code
 Type these two commands into Claude Code:
 
 ```
@@ -37,10 +21,17 @@ Type these two commands into Claude Code:
 /plugin install amaltash@amaltash
 ```
 
-Restart Claude Code. That's it — Amaltash is now connected. (Prefer a
-click-through guide with screenshots? Open
-[`amaltash-plugin/install-guide.html`](amaltash-plugin/install-guide.html) in
-your browser.)
+### 2. Connect your account
+Run `/mcp`, pick **amaltash**, and choose **Authenticate**. Your browser opens
+to Amaltash — sign in if you aren't already, then click **Approve access**.
+That's it: Claude is connected, and it stays connected (the sign-in is
+remembered and refreshed for you — no token to paste, nothing to add to your
+shell).
+
+> Prefer a click-through guide with screenshots? Open
+> [`amaltash-plugin/install-guide.html`](amaltash-plugin/install-guide.html) in
+> your browser. Running in a headless or CI environment with no browser? See
+> [Headless / automated setup](#headless--automated-setup) below.
 
 ---
 
@@ -101,10 +92,31 @@ Just talk to Claude normally. A few to get you going:
 
 - **Nothing runs on your computer.** The plugin connects to Amaltash's secure
   hosted service over HTTPS; there's no software to install or update.
-- **Your token is yours.** It's sent privately with each request and can be
-  revoked instantly from **Settings → Security → Claude connector**. If it ever
-  stops working, just create a new one and update the `AMALTASH_AGENT_TOKEN`
-  line from step 2.
+- **One-click, secure sign-in.** Connecting uses OAuth — the same standard
+  "Sign in with…" flow you know from the web. Claude never sees your password,
+  and the access it's granted is stored encrypted on your machine and refreshed
+  automatically. Revoke it any time from **Settings → Security → Claude
+  connector** in your dashboard (or `/mcp` → amaltash → Clear authentication).
 - **Questions or issues?** See the
   [install & troubleshooting guide](amaltash-plugin/install-guide.html) or visit
   [amaltash.com](https://amaltash.com).
+
+---
+
+## Headless / automated setup
+
+Most people should use the one-click browser flow above. But if you're running
+Claude where **no browser is available** (a server, CI, a container), connect
+with a personal token instead:
+
+1. In your dashboard, open **Settings → Security → Claude connector** and click
+   **Create token** (copy it — it's shown once and looks like `amat_…`).
+2. Add the connector with that token as a Bearer header:
+
+   ```bash
+   claude mcp add --transport http amaltash \
+     https://mcp.amaltash.com/mcp \
+     --header "Authorization: Bearer amat_…"
+   ```
+
+The token can be revoked or rotated any time from the same dashboard screen.

@@ -6,24 +6,23 @@ description: Use when the user wants to do anything on their Amaltash trading ac
 # Amaltash trading via the MCP server
 
 This plugin exposes the Amaltash account through the hosted `amaltash` MCP
-server (`mcp.amaltash.com`). Authentication is a personal `amat_…` token the
-user creates in their dashboard and exposes to Claude as the
-`AMALTASH_AGENT_TOKEN` environment variable (the plugin sends it as a Bearer
-header).
+server (`mcp.amaltash.com`). Authentication is OAuth, handled by the MCP client:
+the user runs `/mcp` → **amaltash** → **Authenticate** and approves once in the
+browser; Claude stores and refreshes the access token. (Headless/CI setups
+instead send a personal `amat_…` token as a Bearer header — see the README.)
 
 ## Always start here
 1. Call `connection_status` to see what's set up (live/paper account, KYC, banks).
-2. If a tool reports it isn't authenticated, the user's `AMALTASH_AGENT_TOKEN`
-   is missing, revoked, or expired. Tell them to create a token at
-   **Settings → Security → Claude connector** in the Amaltash dashboard, set it
-   as that environment variable, and restart Claude Code. Do NOT attempt a
-   headless login.
+2. If a tool reports it isn't authenticated, the user hasn't connected (or their
+   access was revoked/expired). Tell them to run `/mcp`, pick **amaltash**, and
+   choose **Authenticate**, then approve in the browser. Do NOT attempt a
+   headless login yourself.
 
 ## Tool map (call these, don't hand-roll HTTP)
 
 | Goal | Tool |
 | --- | --- |
-| Check the connector token works | `authenticate` (validates `AMALTASH_AGENT_TOKEN`) |
+| Confirm the connection works | `authenticate` (validates the current OAuth/Bearer credential) |
 | Who am I / profile | `get_account_info` |
 | Find strategies | `search_marketplace` |
 | Create a strategy from an idea | `create_strategy` (streams token usage → strategy_id) |

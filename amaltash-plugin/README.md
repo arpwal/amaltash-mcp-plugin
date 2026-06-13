@@ -22,26 +22,30 @@ at `https://mcp.amaltash.com` — nothing runs locally.
 > A step-by-step walkthrough lives in [`install-guide.html`](install-guide.html)
 > — open it in a browser.
 
-1. **Create a connector token** in your Amaltash dashboard:
-   **Settings → Security → Claude connector → Create token** (copy it — it's
-   shown once; it looks like `amat_…`).
-2. **Expose it to Claude** as an environment variable:
-   ```bash
-   export AMALTASH_AGENT_TOKEN="amat_…"
-   ```
-3. **Add the plugin** in Claude Code:
+1. **Add the plugin** in Claude Code:
    ```
    /plugin marketplace add arpwal/amaltash-mcp-plugin
    /plugin install amaltash@amaltash
    ```
-   The bundled `.mcp.json` connects to `https://mcp.amaltash.com` and sends your
-   token as an `Authorization: Bearer` header.
+2. **Connect** — run `/mcp`, pick **amaltash**, choose **Authenticate**, and
+   approve in the browser that opens. No token to copy.
 
-### Configuration
+The bundled `.mcp.json` points at `https://mcp.amaltash.com/mcp` with no
+credentials, so the first request triggers Claude's OAuth flow: it discovers the
+authorization server, signs you in, and stores an encrypted, auto-refreshed
+token for you.
 
-| Var | Purpose |
-| --- | --- |
-| `AMALTASH_AGENT_TOKEN` | Your `amat_…` connector token (sent as the Bearer header). Revoke/rotate from the dashboard any time. |
+### Headless / CI
+
+Where no browser is available, connect with a personal token instead. Mint one
+at **Settings → Security → Claude connector → Create token** (`amat_…`, shown
+once), then:
+
+```bash
+claude mcp add --transport http amaltash \
+  https://mcp.amaltash.com/mcp \
+  --header "Authorization: Bearer amat_…"
+```
 
 ## Try it
 
@@ -54,9 +58,13 @@ Claude will read your account, `create_strategy`, and `backtest_strategy`
 ## How it works
 
 ```
-Claude ──(MCP over HTTPS, Authorization: Bearer amat_…)──▶ mcp.amaltash.com  ──▶  Amaltash API
+Claude ──(MCP over HTTPS, OAuth 2.1)──▶ mcp.amaltash.com  ──▶  Amaltash API
+        first call → 401 + discovery → sign in once → encrypted token, auto-refreshed
 ```
 
-The hosted server authenticates every request with your token — no passwords or
-local secrets ever reach the plugin. Manage and revoke tokens from
-**Settings → Security → Claude connector** in your dashboard.
+`mcp.amaltash.com` is an OAuth resource server: a tokenless request returns a
+discovery challenge that Claude uses to run the sign-in (auth-code + PKCE) flow.
+The minted token rides the same security model as everything else — revoke it
+from **Settings → Security → Claude connector**, or `/mcp` → Clear
+authentication. (Headless setups send a personal `amat_…` token as a Bearer
+header instead.)
